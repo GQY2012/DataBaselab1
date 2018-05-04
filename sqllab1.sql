@@ -201,45 +201,24 @@ group by name;
 drop table reader;
 drop table book;*/
 
-/*select * from book;
+select * from book;
 select * from reader;
-select * from borrow;*/
+select * from borrow;
 
---存储过程
-create or replace procedure Changebookid(id_old in char, id_new in char)
-       as
-begin  
-        execute immediate 'alter table borrow disable constraint book_idfk';
-        update book set book.id = id_new where book.id = id_old;
-        update borrow set book_id = id_new where book_id = id_old;
-        execute immediate 'alter table borrow enable constraint book_idfk';
-end; 
+--调用存储过程
 
-exec Changebookid('00000003','00000031');
+alter table borrow disable constraint book_idfk;
+call Changebookid('00000031','00000032');
+alter table borrow enable constraint book_idfk;
 
---触发器
-create or replace trigger borrow_status
-after insert or delete on borrow
-for each row
-begin
-if inserting then
-update book
-set book.status = 1
-where book.id = :new.book_id;
-else
-update book
-set book.status = 0
-where book.id = :old.book_id;
-end if;
-end;
+--触发触发器
 
 insert into borrow(book_id,
                    reader_id,
                    borrow_date,
                    return_date)
                    values('00000010','10000010',to_date ( '2017-12-25 12:21:14' , 'YYYY-MM-DD HH24:MI:SS' ),null);
-                   commit;
 
 delete from borrow
-	where reader_id = '10000010';
-	commit;
+  where reader_id = '10000010';
+
